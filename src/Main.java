@@ -27,7 +27,7 @@ public class Main extends Canvas
     public Main()
     {
         try {
-            image = ImageIO.read(new File("img/ferrari.jpg"));
+            image = ImageIO.read(new File("img/tron_lambo.jpg"));
         } catch(IOException e) {
             e.printStackTrace();
         }
