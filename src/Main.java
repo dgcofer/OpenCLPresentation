@@ -1,13 +1,14 @@
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Toolkit;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -22,6 +23,7 @@ public class Main extends Canvas
     private static final int HEIGHT = SCREEN_DIM.height;
     
     private BufferedImage image;
+    private byte[] originalPixels;
     private byte[] pixels;
     
     public Main()
@@ -34,13 +36,7 @@ public class Main extends Canvas
         
         //Pixels in the form B, G, R, B, G, R,...
         pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        long start = System.currentTimeMillis();
-        
-//        invert();
-        grayScale();
-        
-        long end = System.currentTimeMillis();
-        System.out.println((end - start) + " ms");
+        originalPixels = pixels.clone();
     }
     
     /**
@@ -63,6 +59,18 @@ public class Main extends Canvas
         {
             int pix = Byte.toUnsignedInt(pixels[i]);
             pixels[i] = (byte) (255 - pix);
+        }
+    }
+    
+    public void original()
+    {
+        InputStream in = new ByteArrayInputStream(originalPixels);
+        try
+        {
+            image = ImageIO.read(in);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
     
@@ -94,7 +102,8 @@ public class Main extends Canvas
         frame.setSize(SCREEN_DIM);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(m);
+        frame.add(m, BorderLayout.CENTER);
+        frame.add(new ButtonPanel(m), BorderLayout.SOUTH);
         frame.setVisible(true);
     }
 }
