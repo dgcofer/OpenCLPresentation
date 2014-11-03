@@ -36,8 +36,7 @@ public class ButtonPanel extends JPanel implements ActionListener
         String btnText = e.getActionCommand();
         if(btnText.equals(originalBtn.getText()))
         {
-            System.out.println("Original button clicked");
-            m.original();
+            m.showOriginal();
             m.repaint();
         }
         if(btnText.equals(invertBtn.getText()))

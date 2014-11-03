@@ -23,20 +23,11 @@ public class Main extends Canvas
     private static final int HEIGHT = SCREEN_DIM.height;
     
     private BufferedImage image;
-    private byte[] originalPixels;
     private byte[] pixels;
     
     public Main()
     {
-        try {
-            image = ImageIO.read(new File("img/tron_lambo.jpg"));
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-        
-        //Pixels in the form B, G, R, B, G, R,...
-        pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        originalPixels = pixels.clone();
+        showOriginal();
     }
     
     /**
@@ -62,16 +53,16 @@ public class Main extends Canvas
         }
     }
     
-    public void original()
+    public void showOriginal()
     {
-        InputStream in = new ByteArrayInputStream(originalPixels);
-        try
-        {
-            image = ImageIO.read(in);
-        } catch (IOException e)
-        {
+        try {
+            image = ImageIO.read(new File("img/tron_lambo.jpg"));
+        } catch(IOException e) {
             e.printStackTrace();
         }
+        
+        //Pixels in the form B, G, R, B, G, R,...
+        pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
     }
     
     /**
