@@ -91,7 +91,8 @@ public class Main extends Canvas
     {
         Main m = new Main();
         JFrame frame = new JFrame("OpenCL Presentation");
-        frame.setSize(WIDTH , HEIGHT);
+        frame.setSize(SCREEN_DIM);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(m);
         frame.setVisible(true);
