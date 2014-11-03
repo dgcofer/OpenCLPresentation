@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 @SuppressWarnings("serial")
 public class Main extends Canvas
 {
+    //Gets screen resolution
     private static final Dimension SCREEN_DIM = Toolkit.getDefaultToolkit().getScreenSize();
     private static final int WIDTH = SCREEN_DIM.width;
     private static final int HEIGHT = SCREEN_DIM.height;
@@ -42,7 +43,9 @@ public class Main extends Canvas
         System.out.println((end - start) + " ms");
     }
     
-    
+    /**
+     * Paints the image on the JFrame.
+     */
     @Override
     public void paint(Graphics g)
     {
@@ -51,6 +54,9 @@ public class Main extends Canvas
         g.dispose();
     }
     
+    /**
+     * Inverts the pixels of the image
+     */
     public void invert()
     {
         for(int i = 0; i < pixels.length; i++)
@@ -60,6 +66,9 @@ public class Main extends Canvas
         }
     }
     
+    /**
+     * Converts the image to grayscale.
+     */
     public void grayScale()
     {
         for(int i = 0; i < pixels.length; i+=3)
@@ -67,6 +76,7 @@ public class Main extends Canvas
             byte blue = pixels[i];
             byte green = pixels[i + 1];
             byte red = pixels[i + 2];
+            
             byte avg = (byte) (blue * 0.114 + green * 0.587 + red * 0.299); //luminosity
 //            byte avg = (byte) ((blue + green + red) / 3); //average
             
