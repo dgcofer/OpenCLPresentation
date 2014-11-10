@@ -5,10 +5,8 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -27,7 +25,7 @@ public class Main extends Canvas
     
     public Main()
     {
-        showOriginal();
+        showOriginal();       
     }
     
     /**
@@ -85,6 +83,47 @@ public class Main extends Canvas
         }
     }
     
+    public void emboss()
+    {
+        for(int i = image.getWidth(); i < pixels.length; i+=3)
+        {
+            int blueIndex = i;
+            int greenIndex = i + 1;
+            int redIndex = i + 2;
+            int blue = Byte.toUnsignedInt(pixels[blueIndex]);
+            int green = Byte.toUnsignedInt(pixels[greenIndex]);
+            int red = Byte.toUnsignedInt(pixels[redIndex]);
+            int redDiff = 0;
+            int greenDiff = 0;
+            int blueDiff = 0;
+            
+            int v = 0;
+            
+            if(i <= image.getWidth() * 3)
+            {
+                v = 128;
+            }
+            else
+            {
+                redDiff = red - pixels[redIndex - image.getWidth() * 3 - 1];
+                greenDiff = green - pixels[greenIndex - image.getWidth() * 3 - 1];
+                blueDiff = blue - pixels[blueIndex - image.getWidth() * 3 - 1];
+            }
+            
+            int maxDiff = Math.max(redDiff, Math.max(greenDiff, blueDiff));
+            
+            v = 128 + maxDiff;
+            
+            if(v < 0)
+                v = 0;
+            if(v > 255)
+                v = 255;
+            
+            pixels[blueIndex] = (byte) v;
+            pixels[greenIndex] = (byte) v;
+            pixels[redIndex] = (byte) v;
+        }
+    }
     
     public static void main(String[] args)
     {
