@@ -29,7 +29,28 @@ public class Main extends Canvas
     
     public Main()
     {
-        showOriginal();
+        try {
+            image = ImageIO.read(new File("img/tron_lambo.jpg"));
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        
+        //Pixels in the form B, G, R, B, G, R,...
+        rgbs = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        pixels = new Pixel[rgbs.length / 3];
+        for(int i = 0; i < pixels.length; i++)
+        {
+            byte blue = rgbs[i * 3];
+            byte green = rgbs[(i * 3) + 1];
+            byte red = rgbs[(i * 3) + 2];
+            pixels[i] = new Pixel(red, green, blue);
+        }
+        
+        int iW = image.getWidth();
+        int iH = image.getHeight();
+        System.out.println("Image Width: " + iW);
+        System.out.println("Image Height: " + iH);
+        System.out.println("Total Pixels: " + pixels.length);
     }
     
     /**
@@ -48,43 +69,38 @@ public class Main extends Canvas
      */
     public void invert()
     {
-        for(int i = 0; i < rgbs.length; i++)
-        {
-            int pix = Byte.toUnsignedInt(rgbs[i]);
-            rgbs[i] = (byte) (255 - pix);
-        }
-    }
-    
-    /** TODO
-     * This is freezing the UI needs to be reimplemented
-     */
-    public void showOriginal()
-    {
-        try {
-            image = ImageIO.read(new File("img/tron_lambo.jpg"));
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-        
-        //Pixels in the form B, G, R, B, G, R,...
-        rgbs = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        pixels = new Pixel[rgbs.length / 3];
         for(int i = 0; i < pixels.length; i++)
         {
-            byte blue = rgbs[i * 3];
-            byte green = rgbs[(i * 3) + 1];
-            byte red = rgbs[(i * 3) + 2];
-            pixels[i] = new Pixel(red, green, blue);
-            
+            int blueIndex = i * 3;
+            int greenIndex = (i * 3) + 1;
+            int redIndex = (i * 3) + 2;
+            int blue = Byte.toUnsignedInt(pixels[i].getBlue());
+            int green = Byte.toUnsignedInt(pixels[i].getGreen());
+            int red = Byte.toUnsignedInt(pixels[i].getRed());
+            rgbs[blueIndex] = (byte) (255 - blue);
+            rgbs[greenIndex] = (byte) (255 - green);
+            rgbs[redIndex] = (byte) (255 - red);
         }
-        int iW = image.getWidth();
-        int iH = image.getHeight();
-        System.out.println("Image Width: " + iW);
-        System.out.println("Image Height: " + iH);
-        System.out.println(pixels.length);
     }
     
-    /**
+    /** 
+     * Converts to the original image
+     */
+    public void showOriginal()
+    {        
+        for(int i = 0; i < pixels.length; i++)
+        {
+            int blueIndex = i * 3;
+            int greenIndex = (i * 3) + 1;
+            int redIndex = (i * 3) + 2;
+            
+            rgbs[blueIndex] = pixels[i].getBlue();
+            rgbs[greenIndex] = pixels[i].getGreen();
+            rgbs[redIndex] = pixels[i].getRed();
+        }
+    }
+    
+    /** TODO change to using the Pixel class
      * Converts the image to grayscale.
      */
     public void grayScale()
