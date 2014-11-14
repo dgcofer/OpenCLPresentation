@@ -5,8 +5,11 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -21,11 +24,12 @@ public class Main extends Canvas
     private static final int HEIGHT = SCREEN_DIM.height;
     
     private BufferedImage image;
-    private byte[] pixels;
+    private byte[] rgbs;
+    private Pixel[] pixels;
     
     public Main()
     {
-        showOriginal();       
+        showOriginal();
     }
     
     /**
@@ -44,13 +48,16 @@ public class Main extends Canvas
      */
     public void invert()
     {
-        for(int i = 0; i < pixels.length; i++)
+        for(int i = 0; i < rgbs.length; i++)
         {
-            int pix = Byte.toUnsignedInt(pixels[i]);
-            pixels[i] = (byte) (255 - pix);
+            int pix = Byte.toUnsignedInt(rgbs[i]);
+            rgbs[i] = (byte) (255 - pix);
         }
     }
     
+    /** TODO
+     * This is freezing the UI needs to be reimplemented
+     */
     public void showOriginal()
     {
         try {
@@ -60,7 +67,21 @@ public class Main extends Canvas
         }
         
         //Pixels in the form B, G, R, B, G, R,...
-        pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        rgbs = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        pixels = new Pixel[rgbs.length / 3];
+        for(int i = 0; i < pixels.length; i++)
+        {
+            byte blue = rgbs[i * 3];
+            byte green = rgbs[(i * 3) + 1];
+            byte red = rgbs[(i * 3) + 2];
+            pixels[i] = new Pixel(red, green, blue);
+            
+        }
+        int iW = image.getWidth();
+        int iH = image.getHeight();
+        System.out.println("Image Width: " + iW);
+        System.out.println("Image Height: " + iH);
+        System.out.println(pixels.length);
     }
     
     /**
@@ -68,60 +89,65 @@ public class Main extends Canvas
      */
     public void grayScale()
     {
-        for(int i = 0; i < pixels.length; i+=3)
+        for(int i = 0; i < rgbs.length; i+=3)
         {
-            byte blue = pixels[i];
-            byte green = pixels[i + 1];
-            byte red = pixels[i + 2];
+            byte blue = rgbs[i];
+            byte green = rgbs[i + 1];
+            byte red = rgbs[i + 2];
             
             byte avg = (byte) (blue * 0.114 + green * 0.587 + red * 0.299); //luminosity
 //            byte avg = (byte) ((blue + green + red) / 3); //average
             
-            pixels[i] = avg;
-            pixels[i + 1] = avg;
-            pixels[i + 2] = avg;
+            rgbs[i] = avg;
+            rgbs[i + 1] = avg;
+            rgbs[i + 2] = avg;
         }
     }
     
+    /**
+     * Embosses the picture
+     */
     public void emboss()
     {
-        for(int i = image.getWidth(); i < pixels.length; i+=3)
+        for(int i = 0; i < pixels.length; i++)
         {
-            int blueIndex = i;
-            int greenIndex = i + 1;
-            int redIndex = i + 2;
-            int blue = Byte.toUnsignedInt(pixels[blueIndex]);
-            int green = Byte.toUnsignedInt(pixels[greenIndex]);
-            int red = Byte.toUnsignedInt(pixels[redIndex]);
-            int redDiff = 0;
-            int greenDiff = 0;
-            int blueDiff = 0;
+            int blueIndex = i * 3;
+            int greenIndex = (i * 3) + 1;
+            int redIndex = (i * 3) + 2;
+            int red = Byte.toUnsignedInt(pixels[i].getRed());
+            int green = Byte.toUnsignedInt(pixels[i].getGreen());
+            int blue = Byte.toUnsignedInt(pixels[i].getBlue());
+            int redDiff = 0, greenDiff = 0, blueDiff = 0;
             
             int v = 0;
+            int imageWidth = image.getWidth();
             
-            if(i <= image.getWidth() * 3)
-            {
+            if(i < imageWidth || i % imageWidth == 0)
                 v = 128;
-            }
             else
             {
-                redDiff = red - pixels[redIndex - image.getWidth() * 3 - 1];
-                greenDiff = green - pixels[greenIndex - image.getWidth() * 3 - 1];
-                blueDiff = blue - pixels[blueIndex - image.getWidth() * 3 - 1];
+                redDiff = red - pixels[i - imageWidth - 1].getRed();
+                greenDiff = green - pixels[i - imageWidth - 1].getGreen();
+                blueDiff = blue - pixels[i - imageWidth - 1].getBlue();
+                
+                int maxDiff = 0;
+                if(Math.abs(redDiff) >= Math.abs(greenDiff))
+                    maxDiff = redDiff;
+                else if(Math.abs(greenDiff) >= Math.abs(blueDiff))
+                    maxDiff = greenDiff;
+                else
+                    maxDiff = blueDiff;
+                
+                v = 128 + maxDiff;
+                if(v < 0)
+                    v = 0;
+                if(v > 255)
+                    v = 255;
             }
             
-            int maxDiff = Math.max(redDiff, Math.max(greenDiff, blueDiff));
-            
-            v = 128 + maxDiff;
-            
-            if(v < 0)
-                v = 0;
-            if(v > 255)
-                v = 255;
-            
-            pixels[blueIndex] = (byte) v;
-            pixels[greenIndex] = (byte) v;
-            pixels[redIndex] = (byte) v;
+            rgbs[blueIndex] = (byte) v;
+            rgbs[greenIndex] = (byte) v;
+            rgbs[redIndex] = (byte) v;
         }
     }
     
