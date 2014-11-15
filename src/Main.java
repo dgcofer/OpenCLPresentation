@@ -30,7 +30,7 @@ public class Main extends Canvas
     public Main()
     {
         try {
-            image = ImageIO.read(new File("img/tron_lambo.jpg"));
+            image = ImageIO.read(new File("img/ramen_pic.jpg"));
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -100,23 +100,26 @@ public class Main extends Canvas
         }
     }
     
-    /** TODO change to using the Pixel class
+    /**
      * Converts the image to grayscale.
      */
     public void grayScale()
     {
-        for(int i = 0; i < rgbs.length; i+=3)
+        for(int i = 0; i < pixels.length; i++)
         {
-            byte blue = rgbs[i];
-            byte green = rgbs[i + 1];
-            byte red = rgbs[i + 2];
+            int blueIndex = i * 3;
+            int greenIndex = (i * 3) + 1;
+            int redIndex = (i * 3) + 2;
+            byte blue = pixels[i].getBlue();
+            byte green = pixels[i].getGreen();
+            byte red = pixels[i].getRed();
             
             byte avg = (byte) (blue * 0.114 + green * 0.587 + red * 0.299); //luminosity
-//            byte avg = (byte) ((blue + green + red) / 3); //average
+//          byte avg = (byte) ((blue + green + red) / 3); //average
             
-            rgbs[i] = avg;
-            rgbs[i + 1] = avg;
-            rgbs[i + 2] = avg;
+            rgbs[blueIndex] = avg;
+            rgbs[greenIndex] = avg;
+            rgbs[redIndex] = avg;
         }
     }
     

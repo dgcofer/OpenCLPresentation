@@ -43,7 +43,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             long start = System.currentTimeMillis();
             m.invert();
             long end = System.currentTimeMillis();
-            System.out.println((end - start) + " ms");
+            System.out.println("Invert: " + (end - start) + " ms");
             m.repaint();
         }
         if(btnText.equals(grayscaleBtn.getText()))
@@ -51,7 +51,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             long start = System.currentTimeMillis();
             m.grayScale();
             long end = System.currentTimeMillis();
-            System.out.println((end - start) + " ms");
+            System.out.println("Grayscale: " + (end - start) + " ms");
             m.repaint();
         }
         if(btnText.equals(embossBtn.getText()))
@@ -59,7 +59,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             long start = System.currentTimeMillis();
             m.emboss();
             long end = System.currentTimeMillis();
-            System.out.println((end - start) + " ms");
+            System.out.println("Emboss: " + (end - start) + " ms");
             m.repaint();
         }
     }
