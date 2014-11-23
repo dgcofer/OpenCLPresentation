@@ -244,7 +244,7 @@ public class OpenCLMain extends Canvas
         long end = System.nanoTime();
         return (end - start) / MILLION;
     }
-
+    
     /**
      * Executes an OpenCL kernel.
      * 
@@ -254,46 +254,52 @@ public class OpenCLMain extends Canvas
      */
     public double openCL(String kernelName)
     {
-        IntBuffer rgbBuffer = UtilCL.toIntBuffer(Pixel.getRGBArray(pixels));
+        int[] rgbArray = Pixel.getRGBArray(pixels);
+        IntBuffer rgbBuffer = UtilCL.toIntBuffer(rgbArray);
+        IntBuffer ansBuffer = BufferUtils.createIntBuffer(rgbArray.length);
 
-        CLMem bufMem = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, rgbBuffer, null);
+        CLMem bufMem = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, rgbBuffer, null);
         clEnqueueWriteBuffer(queue, bufMem, 1, 0, rgbBuffer, null, null);
+        CLMem ansMem = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, ansBuffer, null);
         clFinish(queue);
 
         CLKernel kernel = clCreateKernel(program, kernelName, null);
 
         PointerBuffer kernel1DGlobalWorkSize = BufferUtils.createPointerBuffer(1);
         kernel1DGlobalWorkSize.put(0, rgbBuffer.capacity());
+        kernel1DGlobalWorkSize.rewind();
 
         kernel.setArg(0, bufMem);
+        kernel.setArg(1, ansMem);
         if(kernelName.equals("emboss"))//Need to pass width for emboss kernel to work
-            kernel.setArg(1, image.getWidth());
-
-        PointerBuffer event = BufferUtils.createPointerBuffer(1);
+            kernel.setArg(2, image.getWidth());
+        
+        PointerBuffer eventPointer = BufferUtils.createPointerBuffer(1);
 
         long start = System.nanoTime();
-        clEnqueueNDRangeKernel(queue, kernel, 1, null, kernel1DGlobalWorkSize, null, null, event);
+        clEnqueueNDRangeKernel(queue, kernel, 1, null, kernel1DGlobalWorkSize, null, null, eventPointer);
 
         // Execution time profiling
-        CLEvent e = queue.getCLEvent(event.get(0));
+        CLEvent event = queue.getCLEvent(eventPointer.get(0));
         clFinish(queue);
-        clGetEventProfilingInfo(e, CL_PROFILING_COMMAND_START, null, event);
-        clGetEventProfilingInfo(e, CL_PROFILING_COMMAND_END, null, event);
-        long exeStart = e.getProfilingInfoLong(CL_PROFILING_COMMAND_START);
-        long exeEnd = e.getProfilingInfoLong(CL_PROFILING_COMMAND_END);
+        clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, null, eventPointer);
+        clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, null, eventPointer);
+        long exeStart = event.getProfilingInfoLong(CL_PROFILING_COMMAND_START);
+        long exeEnd = event.getProfilingInfoLong(CL_PROFILING_COMMAND_END);
         System.out.println("OpenCL execution time: " + (exeEnd - exeStart) / MILLION + " ms");
 
-        clEnqueueReadBuffer(queue, bufMem, 1, 0, rgbBuffer, null, null);
-
+        clEnqueueReadBuffer(queue, ansMem, 1, 0, ansBuffer, null, null);
+        
         clFinish(queue);
 
-        writeBufferToImage(rgbBuffer);
+        writeBufferToImage(ansBuffer);
         
         long end = System.nanoTime();
 
-        clReleaseEvent(e);
+        clReleaseEvent(event);
         clReleaseKernel(kernel);
         clReleaseMemObject(bufMem);
+        clReleaseMemObject(ansMem);
 
         return (end - start) / MILLION;
     }
