@@ -1,0 +1,134 @@
+/*
+ * Copyright 2008-2013 Heaton Research, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For more information on Heaton Research copyrights, licenses
+ * and trademarks visit:
+ * http://www.heatonresearch.com/copyright
+ */
+
+
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_ACCELERATOR;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_CPU;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_DEFAULT;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_GPU;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.text.DecimalFormat;
+
+import org.lwjgl.BufferUtils;
+
+/**
+ * Some utilities for OpenCL
+ */
+public class UtilCL {
+
+    /**
+     * Private constructor.
+     */
+    private UtilCL() {
+
+    }
+
+    /**
+     * Format a number to a memory size.
+     * @param size The size.
+     * @return The formatted size!
+     */
+    public static String formatMemory(long size) {
+        if(size <= 0) return "0";
+        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
+    /**
+     * Get the device type.
+     * @param i The device type id.
+     * @return The device type.
+     */
+    public static String getDeviceType(int i) {
+        switch(i) {
+            case CL_DEVICE_TYPE_DEFAULT: return "DEFAULT";
+            case CL_DEVICE_TYPE_CPU: return "CPU";
+            case CL_DEVICE_TYPE_GPU: return "GPU";
+            case CL_DEVICE_TYPE_ACCELERATOR: return "ACCELERATOR";
+        }
+        return "?";
+    }
+
+    /**
+     * Utility method to convert float array to float buffer
+     *
+     * @param floats - the float array to convert
+     * @return a float buffer containing the input float array
+     */
+    public static FloatBuffer toFloatBuffer(float... floats) {
+        FloatBuffer buf = BufferUtils.createFloatBuffer(floats.length).put(floats);
+        buf.rewind();
+        return buf;
+    }
+    
+    public static IntBuffer toIntBuffer(int... ints)
+    {
+        IntBuffer buf = BufferUtils.createIntBuffer(ints.length).put(ints);
+        buf.rewind();
+        return buf;
+    }
+    
+    public static ByteBuffer toByteBuffer(byte...bytes)
+    {
+        ByteBuffer buf = BufferUtils.createByteBuffer(bytes.length).put(bytes);
+        buf.rewind();
+        return buf;
+    }
+
+    /**
+     * Utility method to print a float buffer
+     *
+     * @param buffer - the float buffer to print to System.out
+     */
+    public static void print(FloatBuffer buffer) {
+        for (int i = 0; i < buffer.capacity(); i++) {
+            System.out.print(buffer.get(i) + " ");
+        }
+        System.out.println("");
+    }
+
+    /**
+     * Read a resource into a string.
+     * @param filePath The resource to read.
+     * @return The resource as a string.
+     * @throws java.io.IOException
+     */
+    public static String getResourceAsString(String filePath) throws IOException {
+        InputStream is = UtilCL.class.getClassLoader().getResourceAsStream(filePath);
+        if (is == null) {
+            throw new IOException("Can't find resource: " + filePath);
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
+        }
+        return sb.toString();
+    }
+}
