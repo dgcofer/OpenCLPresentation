@@ -245,6 +245,14 @@ public class OpenCLMain extends Canvas
         return (end - start) / MILLION;
     }
     
+    public double blur()
+    {
+        long start = System.nanoTime();
+        
+        long end = System.nanoTime();
+        return (end - start) / MILLION;
+    }
+    
     /**
      * Executes an OpenCL kernel.
      * 
