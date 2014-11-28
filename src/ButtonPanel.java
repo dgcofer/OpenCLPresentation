@@ -26,6 +26,7 @@ public class ButtonPanel extends JPanel implements ActionListener
     private JButton invertBtn = new JButton("Invert");
     private JButton grayscaleBtn = new JButton("Grayscale");
     private JButton embossBtn = new JButton("Emboss");
+    private JButton blurBtn = new JButton("Blur");
 
     public ButtonPanel(OpenCLMain m)
     {
@@ -38,12 +39,14 @@ public class ButtonPanel extends JPanel implements ActionListener
         invertBtn.addActionListener(this);
         grayscaleBtn.addActionListener(this);
         embossBtn.addActionListener(this);
+        blurBtn.addActionListener(this);
 
         add(openCL);
         add(originalBtn);
         add(invertBtn);
         add(grayscaleBtn);
         add(embossBtn);
+        add(blurBtn);
     }
     
     private void printHeader(String name)
@@ -76,7 +79,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             printHeader("Invert");
             double timeTaken = 0.0;
             if(useOpenCL)
-                timeTaken = m.openCL("invert");
+                timeTaken = m.openCL("invert", false);
             else
                 timeTaken = m.invert();
             printTotalTime(timeTaken);
@@ -87,7 +90,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             printHeader("Grayscale");
             double timeTaken = 0.0;
             if(useOpenCL)
-                timeTaken = m.openCL("gray_scale");
+                timeTaken = m.openCL("gray_scale", false);
             else
                 timeTaken = m.grayScale();
             printTotalTime(timeTaken);
@@ -98,9 +101,21 @@ public class ButtonPanel extends JPanel implements ActionListener
             printHeader("Emboss");
             double timeTaken = 0.0;
             if(useOpenCL)
-                timeTaken = m.openCL("emboss");
+                timeTaken = m.openCL("emboss", true);
             else
                 timeTaken = m.emboss();
+            printTotalTime(timeTaken);
+            m.repaint();
+        }
+        if(btnText.equals("Blur"))
+        {
+            printHeader("Blur");
+            double timeTaken = 0.0;
+            if(useOpenCL){
+                timeTaken = m.openCL("blur", true);
+            }
+            else
+                timeTaken = m.blur();
             printTotalTime(timeTaken);
             m.repaint();
         }

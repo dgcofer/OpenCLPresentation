@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -245,9 +246,46 @@ public class OpenCLMain extends Canvas
         return (end - start) / MILLION;
     }
     
+    /**
+     * Blurs the image using a motion blur algorithm
+     */
     public double blur()
     {
         long start = System.nanoTime();
+        int width =  image.getWidth();
+        for(int i = 0; i < pixels.length; i++)
+        {
+            int blur = 200;
+            int x = i % width;
+            int y = i / width;
+            
+            int max = 0;
+            if(x + blur < width)
+            {
+                max = x + blur;
+            }
+            else
+            {
+                max = width;
+                blur = width - x;
+            }
+            int redSum = 0;
+            int greenSum = 0; 
+            int blueSum = 0;
+            for(int k = x; k < max; k++)
+            {
+                int red = Byte.toUnsignedInt(pixels[y * width + k].getRed());
+                int green = Byte.toUnsignedInt(pixels[y * width + k].getGreen());
+                int blue = Byte.toUnsignedInt(pixels[y * width + k].getBlue());
+                redSum += red;
+                greenSum += green;
+                blueSum += blue;
+            }
+            
+            rgbs[i * 3] = (byte) (blueSum / blur);
+            rgbs[(i * 3) + 1] = (byte) (greenSum / blur);
+            rgbs[(i * 3) + 2] = (byte) (redSum / blur);
+        }
         
         long end = System.nanoTime();
         return (end - start) / MILLION;
@@ -258,9 +296,11 @@ public class OpenCLMain extends Canvas
      * 
      * @param kernelName
      *            name of the kernel to execute
+     * @param useWidth
+     *            true if kernel uses the width parameter of the image
      * @return time take to execute and read from a kernel
      */
-    public double openCL(String kernelName)
+    public double openCL(String kernelName, boolean useWidth)
     {
         int[] rgbArray = Pixel.getRGBArray(pixels);
         IntBuffer rgbBuffer = UtilCL.toIntBuffer(rgbArray);
@@ -279,7 +319,7 @@ public class OpenCLMain extends Canvas
 
         kernel.setArg(0, bufMem);
         kernel.setArg(1, ansMem);
-        if(kernelName.equals("emboss"))//Need to pass width for emboss kernel to work
+        if(useWidth)//if the kernel uses the width property
             kernel.setArg(2, image.getWidth());
         
         PointerBuffer eventPointer = BufferUtils.createPointerBuffer(1);
