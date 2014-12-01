@@ -72,7 +72,6 @@ public class ButtonPanel extends JPanel implements ActionListener
         if (btnText.equals(originalBtn.getText()))
         {
             m.showOriginal();
-            m.repaint();
         }
         if (btnText.equals(invertBtn.getText()))
         {
@@ -83,7 +82,6 @@ public class ButtonPanel extends JPanel implements ActionListener
             else
                 timeTaken = m.invert();
             printTotalTime(timeTaken);
-            m.repaint();
         }
         if (btnText.equals(grayscaleBtn.getText()))
         {
@@ -94,7 +92,6 @@ public class ButtonPanel extends JPanel implements ActionListener
             else
                 timeTaken = m.grayScale();
             printTotalTime(timeTaken);
-            m.repaint();
         }
         if (btnText.equals(embossBtn.getText()))
         {
@@ -105,7 +102,6 @@ public class ButtonPanel extends JPanel implements ActionListener
             else
                 timeTaken = m.emboss();
             printTotalTime(timeTaken);
-            m.repaint();
         }
         if(btnText.equals("Blur"))
         {
@@ -117,7 +113,7 @@ public class ButtonPanel extends JPanel implements ActionListener
             else
                 timeTaken = m.blur();
             printTotalTime(timeTaken);
-            m.repaint();
         }
+        m.repaint();
     }
 }
