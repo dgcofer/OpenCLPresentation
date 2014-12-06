@@ -11,11 +11,11 @@ int3 get_rgb(int pix)
 	return rgb;
 }
 
-__kernel void invert(__global const int *buff, __global int *ans)
+__kernel void invert(__global const int *img_buff, __global int *result)
 {
 	unsigned int id = get_global_id(0);
 	
-	int3 rgb = get_rgb(buff[id]);
+	int3 rgb = get_rgb(img_buff[id]);
 	
 	int red = 255 - rgb.x;
 	int blue = 255 - rgb.y;
@@ -23,14 +23,14 @@ __kernel void invert(__global const int *buff, __global int *ans)
 
 	int pix = (0xFF << 24) + (red << 16) + (green << 8) + blue;
 
-	ans[id] = pix;
+	result[id] = pix;
 }
 
-__kernel void gray_scale(__global const int *buff, __global int *ans)
+__kernel void gray_scale(__global const int *img_buff, __global int *result)
 {
 	unsigned int id = get_global_id(0);
 
-	int3 rgb = get_rgb(buff[id]);
+	int3 rgb = get_rgb(img_buff[id]);
 	
 	uint red = rgb.x;
 	uint blue = rgb.y;
@@ -40,14 +40,14 @@ __kernel void gray_scale(__global const int *buff, __global int *ans)
 
 	int pix = (0xFF << 24) + (avg << 16) + (avg << 8) + avg;
 
-	ans[id] = pix;
+	result[id] = pix;
 }
 
-__kernel void emboss(__global const int *buff, __global int *ans, const int width)
+__kernel void emboss(__global const int *img_buff, __global int *result, const int width)
 {
 	unsigned int id = get_global_id(0);
 	
-	int3 curPix = get_rgb(buff[id]);
+	int3 curPix = get_rgb(img_buff[id]);
 	int curRed = curPix.x;
 	int curGreen = curPix.y;
 	int curBlue = curPix.z;
@@ -61,7 +61,7 @@ __kernel void emboss(__global const int *buff, __global int *ans, const int widt
 	    v = 128;
 	else
 	{
-		int3 topLeftPix = get_rgb(buff[id - width - 1]);
+		int3 topLeftPix = get_rgb(img_buff[id - width - 1]);
 		int tlRed = topLeftPix.x;
 		int tlGreen = topLeftPix.y;
 		int tlBlue = topLeftPix.z;
@@ -86,10 +86,10 @@ __kernel void emboss(__global const int *buff, __global int *ans, const int widt
 	}
 
 	int pix = (0xFF << 24) + (v << 16) + (v << 8) + v;
-	ans[id] = pix;
+	result[id] = pix;
 }
 
-__kernel void blur(__global const int *buff, __global int *ans, const int width)
+__kernel void blur(__global const int *img_buff, __global int *result, const int width)
 {
 	unsigned int id = get_global_id(0);
 	int blur = 200;
@@ -112,7 +112,7 @@ __kernel void blur(__global const int *buff, __global int *ans, const int width)
 	int i;
 	for(i = x; i < max; i++)
 	{
-		int3 curPix = get_rgb(buff[y * width + i]);
+		int3 curPix = get_rgb(img_buff[y * width + i]);
 		redSum += curPix.x;
 		greenSum += curPix.y;
 		blueSum += curPix.z;
@@ -123,5 +123,5 @@ __kernel void blur(__global const int *buff, __global int *ans, const int width)
 	int blue = blueSum / blur;
 
 	int pix = (0xFF << 24) + (red << 16) + (green << 8) + blue;
-	ans[id] = pix;
+	result[id] = pix;
 }

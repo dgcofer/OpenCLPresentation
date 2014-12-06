@@ -1,8 +1,8 @@
-__kernel void emboss(__global const int *buff, __global int *ans, const int width)
+__kernel void emboss(__global const int *img_buff, __global int *result, const int width)
 {
 	unsigned int id = get_global_id(0);
 	
-	int3 curPix = get_rgb(buff[id]);
+	int3 curPix = get_rgb(img_buff[id]);
 	int curRed = curPix.x;
 	int curGreen = curPix.y;
 	int curBlue = curPix.z;
@@ -10,13 +10,13 @@ __kernel void emboss(__global const int *buff, __global int *ans, const int widt
 	int redDiff = 0;
 	int greenDiff = 0;
 	int blueDiff = 0;
-	int v = 0;
+	int v = 0; /*Value to be written to each channel*/
 
 	if(id < width || id % width == 0)
 	    v = 128;
 	else
 	{
-		int3 topLeftPix = get_rgb(buff[id - width - 1]);
+		int3 topLeftPix = get_rgb(img_buff[id - width - 1]);
 		int tlRed = topLeftPix.x;
 		int tlGreen = topLeftPix.y;
 		int tlBlue = topLeftPix.z;
@@ -41,5 +41,5 @@ __kernel void emboss(__global const int *buff, __global int *ans, const int widt
 	}
 
 	int pix = (0xFF << 24) + (v << 16) + (v << 8) + v;
-	ans[id] = pix;
+	result[id] = pix;
 }

@@ -1,4 +1,27 @@
-import static org.lwjgl.opencl.CL10.*;
+import static org.lwjgl.opencl.CL10.CL_DEVICE_TYPE_GPU;
+import static org.lwjgl.opencl.CL10.CL_MEM_COPY_HOST_PTR;
+import static org.lwjgl.opencl.CL10.CL_MEM_READ_ONLY;
+import static org.lwjgl.opencl.CL10.CL_MEM_WRITE_ONLY;
+import static org.lwjgl.opencl.CL10.CL_PROFILING_COMMAND_END;
+import static org.lwjgl.opencl.CL10.CL_PROFILING_COMMAND_START;
+import static org.lwjgl.opencl.CL10.CL_PROGRAM_BUILD_LOG;
+import static org.lwjgl.opencl.CL10.CL_QUEUE_PROFILING_ENABLE;
+import static org.lwjgl.opencl.CL10.clBuildProgram;
+import static org.lwjgl.opencl.CL10.clCreateBuffer;
+import static org.lwjgl.opencl.CL10.clCreateCommandQueue;
+import static org.lwjgl.opencl.CL10.clCreateKernel;
+import static org.lwjgl.opencl.CL10.clCreateProgramWithSource;
+import static org.lwjgl.opencl.CL10.clEnqueueNDRangeKernel;
+import static org.lwjgl.opencl.CL10.clEnqueueReadBuffer;
+import static org.lwjgl.opencl.CL10.clEnqueueWriteBuffer;
+import static org.lwjgl.opencl.CL10.clFinish;
+import static org.lwjgl.opencl.CL10.clGetEventProfilingInfo;
+import static org.lwjgl.opencl.CL10.clReleaseCommandQueue;
+import static org.lwjgl.opencl.CL10.clReleaseContext;
+import static org.lwjgl.opencl.CL10.clReleaseEvent;
+import static org.lwjgl.opencl.CL10.clReleaseKernel;
+import static org.lwjgl.opencl.CL10.clReleaseMemObject;
+import static org.lwjgl.opencl.CL10.clReleaseProgram;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -14,7 +37,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -28,7 +50,6 @@ import org.lwjgl.opencl.CLKernel;
 import org.lwjgl.opencl.CLMem;
 import org.lwjgl.opencl.CLPlatform;
 import org.lwjgl.opencl.CLProgram;
-import org.lwjgl.opencl.Util;
 
 @SuppressWarnings("serial")
 public class OpenCLMain extends Canvas
@@ -123,11 +144,22 @@ public class OpenCLMain extends Canvas
      * Paints the image on the JFrame.
      */
     @Override
-    public void paint(Graphics g)
+    public synchronized void paint(Graphics g)
     {
         super.paint(g);
         g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
         g.dispose();
+    }
+    
+    public void writeImage(String fileName)
+    {
+        File file = new File("img/" + fileName + ".jpg");
+        try {
+            ImageIO.write(image, "jpg", file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Wrote image to: img/" + fileName + ".jpg");
     }
 
     /**

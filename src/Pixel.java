@@ -33,19 +33,6 @@ public class Pixel
         return blue;
     }
     
-    public static byte[] getByteArray(Pixel[] pixels)
-    {
-        byte[] b = new byte[pixels.length * 3];
-        for(int i = 0; i < pixels.length; i++)
-        {
-            b[i * 3] = pixels[i].getBlue();
-            b[(i * 3) + 1] = pixels[i].getGreen();
-            b[(i * 3) + 2] = pixels[i].getRed();
-        }
-        
-        return b;
-    }
-    
     public int getValue()
     {
         return pixel;

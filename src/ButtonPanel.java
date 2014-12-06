@@ -1,12 +1,10 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-
-import org.lwjgl.LWJGLException;
 
 /**
  * JPanel to hold all the action buttons.
@@ -27,6 +25,13 @@ public class ButtonPanel extends JPanel implements ActionListener
     private JButton grayscaleBtn = new JButton("Grayscale");
     private JButton embossBtn = new JButton("Emboss");
     private JButton blurBtn = new JButton("Blur");
+    private JButton saveBtn = new JButton("Save");
+    
+    private JButton testBtn = new JButton("Test");
+    private ArrayList<Double> list = new ArrayList<>();
+    private int counter = 0;
+    
+    private String algoUsed = "";
 
     public ButtonPanel(OpenCLMain m)
     {
@@ -40,6 +45,9 @@ public class ButtonPanel extends JPanel implements ActionListener
         grayscaleBtn.addActionListener(this);
         embossBtn.addActionListener(this);
         blurBtn.addActionListener(this);
+        saveBtn.addActionListener(this);
+        
+        testBtn.addActionListener(this);
 
         add(openCL);
         add(originalBtn);
@@ -47,6 +55,8 @@ public class ButtonPanel extends JPanel implements ActionListener
         add(grayscaleBtn);
         add(embossBtn);
         add(blurBtn);
+//        add(testBtn);
+//        add(saveBtn);
     }
     
     private void printHeader(String name)
@@ -61,6 +71,8 @@ public class ButtonPanel extends JPanel implements ActionListener
     
     private void printTotalTime(double time)
     {
+        list.add(time);
+        counter++;
         System.out.println("Total time taken: " + time + " ms");
         System.out.println();
     }
@@ -69,50 +81,86 @@ public class ButtonPanel extends JPanel implements ActionListener
     public void actionPerformed(ActionEvent e)
     {
         String btnText = e.getActionCommand();
-        if (btnText.equals(originalBtn.getText()))
+        double timeTaken = 0.0;
+        if (btnText.equals(originalBtn.getText()))//Show original image
         {
             m.showOriginal();
+            algoUsed = "";
         }
-        if (btnText.equals(invertBtn.getText()))
+        if (btnText.equals(invertBtn.getText()))//Show inverted image
         {
             printHeader("Invert");
-            double timeTaken = 0.0;
-            if(useOpenCL)
+            if(useOpenCL) {
                 timeTaken = m.openCL("invert", false);
-            else
+                algoUsed = "invert_opencl";
+            }
+            else {
                 timeTaken = m.invert();
+                algoUsed = "invert_java";
+            }
             printTotalTime(timeTaken);
+            
         }
-        if (btnText.equals(grayscaleBtn.getText()))
+        if (btnText.equals(grayscaleBtn.getText()))//Show grayscale image
         {
             printHeader("Grayscale");
-            double timeTaken = 0.0;
-            if(useOpenCL)
+            if(useOpenCL) {
                 timeTaken = m.openCL("gray_scale", false);
-            else
+                algoUsed = "grayscale_opencl";
+            }
+            else {
                 timeTaken = m.grayScale();
+                algoUsed = "grayscale_java";
+            }
             printTotalTime(timeTaken);
         }
-        if (btnText.equals(embossBtn.getText()))
+        if (btnText.equals(embossBtn.getText()))//Show embossed image
         {
             printHeader("Emboss");
-            double timeTaken = 0.0;
-            if(useOpenCL)
+            if(useOpenCL) {
                 timeTaken = m.openCL("emboss", true);
-            else
+                algoUsed = "emboss_opencl";
+            }
+            else {
                 timeTaken = m.emboss();
+                algoUsed = "emboss_java";
+            }
             printTotalTime(timeTaken);
         }
-        if(btnText.equals("Blur"))
+        if(btnText.equals("Blur"))//Show blurred image
         {
             printHeader("Blur");
-            double timeTaken = 0.0;
             if(useOpenCL){
                 timeTaken = m.openCL("blur", true);
+                algoUsed = "blur_opencl";
             }
-            else
+            else {
                 timeTaken = m.blur();
+                algoUsed = "blur_java";
+            }
             printTotalTime(timeTaken);
+        }
+        if(btnText.equals("Save"))//Save image to img/ folder
+        {
+            if(!algoUsed.equals(""))
+                m.writeImage(algoUsed);
+        }
+        if(btnText.equals("Test"))//Run test on a button
+        {
+            list.clear();
+            counter = 0;
+            for(int i = 0; i < 100; i++)
+            {
+                grayscaleBtn.doClick();
+                originalBtn.doClick();
+            }
+            double avg = 0;
+            for(int i = 0; i < list.size(); i++)
+            {
+                avg += list.get(i);
+            }
+            
+            System.out.println("Avg: " + avg / list.size() + " Count: " + counter);
         }
         m.repaint();
     }

@@ -1,4 +1,4 @@
-__kernel void blur(__global const int *buff, __global int *ans, const int width)
+__kernel void blur(__global const int *img_buff, __global int *result, const int width)
 {
 	unsigned int id = get_global_id(0);
 	int blur = 200;
@@ -21,7 +21,7 @@ __kernel void blur(__global const int *buff, __global int *ans, const int width)
 	int i;
 	for(i = x; i < max; i++)
 	{
-		int3 curPix = get_rgb(buff[y * width + i]);
+		int3 curPix = get_rgb(img_buff[y * width + i]);
 		redSum += curPix.x;
 		greenSum += curPix.y;
 		blueSum += curPix.z;
@@ -32,5 +32,5 @@ __kernel void blur(__global const int *buff, __global int *ans, const int width)
 	int blue = blueSum / blur;
 
 	int pix = (0xFF << 24) + (red << 16) + (green << 8) + blue;
-	ans[id] = pix;
+	result[id] = pix;
 }
